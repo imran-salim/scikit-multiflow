@@ -1,0 +1,41 @@
+# Imports
+from skmultiflow.data import RandomRBFGenerator
+from skmultiflow.clustering.clustream import Clustream
+from skmultiflow.evaluation.base_evaluator import ClassificationPerformanceEvaluator
+
+# Setup a data stream
+stream = RandomRBFGenerator(model_random_state=1,
+                            sample_random_state=None,
+                            n_classes=2,
+                            n_features=10,
+                            n_centroids=50)
+stream.prepare_for_use()
+
+# Setup the desired estimator
+clusterer = Clustream(random_state=1,
+                      time_window=1000,
+                      max_kernels=100,
+                      kernel_radius_factor=2,
+                      number_of_clusters=5)
+
+# Auxiliary variables to control loop
+n_samples = 0
+labels = set()
+max_samples = 200
+
+evaluator = ClassificationPerformanceEvaluator()
+X, _ = stream.next_sample(max_samples)
+clusterer.partial_fit(X)
+
+while n_samples < max_samples and stream.has_more_samples():
+    X, y = stream.next_sample()
+    y_pred = clusterer.predict(X)[0]
+    evaluator.add_result(y, y_pred)
+    print('Accuracy score: {}'.format(evaluator.accuracy_score()))
+    labels.add(c)
+    clusterer.partial_fit(X)
+    n_samples += 1
+
+
+print('{} samples analyzed.'.format(n_samples))
+print('Cluster labels: {}'.format(labels))
