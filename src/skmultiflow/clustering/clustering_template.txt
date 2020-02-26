@@ -9,7 +9,6 @@ stream = RandomRBFGenerator(model_random_state=1,
                             n_classes=2,
                             n_features=10,
                             n_centroids=50)
-stream.prepare_for_use()
 
 # Setup the desired estimator
 clusterer = Clustream(random_state=1,
@@ -32,7 +31,7 @@ while n_samples < max_samples and stream.has_more_samples():
     y_pred = clusterer.predict(X)[0]
     evaluator.add_result(y, y_pred)
     print('Accuracy score: {}'.format(evaluator.accuracy_score()))
-    labels.add(c)
+    labels.add(y_pred)
     clusterer.partial_fit(X)
     n_samples += 1
 
