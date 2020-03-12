@@ -1,6 +1,7 @@
 from skmultiflow.clustering.cluster_feature import CFCluster
 import numpy as np
 
+
 EPSILON = 0.00005
 MIN_VARIANCE = 1e-50
 
@@ -119,3 +120,28 @@ class ClustreamKernel(CFCluster):
 
     def sample(self, random_state):
         raise NotImplementedError
+
+    def calc_normalized_distance(self, point):
+        center = self.get_center()
+        res = 0.0
+        for i in range(len(center)):
+            diff = center[i] - point[i]
+            res += diff * diff
+        return np.sqrt(res)
+
+    def get_inclusion_probability(self, X):
+        if self.N == 1:
+            distance = 0.0
+            for i in range(len(self.LST)):
+                d = self.LS[i] - X[i]
+                distance += d * d
+            distance = np.sqrt(distance)
+            if distance < EPSILON:
+                return 1.0
+            return 0.0
+        else:
+            dist = self.calc_normalized_distance(X)
+            if dist <= self.get_radius():
+                return 1
+            else:
+                return 0

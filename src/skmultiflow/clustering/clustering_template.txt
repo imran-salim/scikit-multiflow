@@ -1,14 +1,19 @@
 # Imports
-from skmultiflow.data import RandomRBFGenerator
+from sklearn.metrics.cluster import homogeneity_score
+from sklearn.metrics.cluster import completeness_score
+#from skmultiflow.data import RandomRBFGenerator
+from skmultiflow.data.file_stream import FileStream
 from skmultiflow.clustering.clustream import Clustream
 from skmultiflow.evaluation.base_evaluator import ClassificationPerformanceEvaluator
 
 # Setup a data stream
-stream = RandomRBFGenerator(model_random_state=1,
-                            sample_random_state=None,
-                            n_classes=2,
-                            n_features=10,
-                            n_centroids=50)
+#stream = RandomRBFGenerator(model_random_state=1,
+#                            sample_random_state=None,
+#                            n_classes=2,
+#                            n_features=10,
+#                            n_centroids=50)
+#stream = FileStream('~/Work/data/stream_clustering.csv')
+#stream.prepare_for_use()
 
 # Setup the desired estimator
 clusterer = Clustream(random_state=1,
@@ -19,22 +24,32 @@ clusterer = Clustream(random_state=1,
 
 # Auxiliary variables to control loop
 n_samples = 0
-labels = set()
-max_samples = 200
+labels_true = []
+labels_pred = []
+max_samples = 1000
+matches = 0
 
-evaluator = ClassificationPerformanceEvaluator()
+
+#evaluator = ClassificationPerformanceEvaluator()
 X, _ = stream.next_sample(max_samples)
 clusterer.partial_fit(X)
 
 while n_samples < max_samples and stream.has_more_samples():
     X, y = stream.next_sample()
     y_pred = clusterer.predict(X)[0]
-    evaluator.add_result(y, y_pred)
-    print('Accuracy score: {}'.format(evaluator.accuracy_score()))
-    labels.add(y_pred)
+    #evaluator.add_result(y, y_pred)
+    #print('Accuracy score: {}'.format(evaluator.accuracy_score()))
+    labels_true.append(y[0])
+    labels_pred.append(y_pred)
+    if labels_true == labels_pred:
+        matches += 1
     clusterer.partial_fit(X)
     n_samples += 1
 
-
+metric_score = homogeneity_score(labels_true, labels_pred)
+print('Homogeneity score: {}'.format(metric_score))
+metric_score = completeness_score(labels_true, labels_pred)
+print('Completeness score: {}'.format(metric_score))
 print('{} samples analyzed.'.format(n_samples))
-print('Cluster labels: {}'.format(labels))
+#print('Cluster labels: {}'.format(labels))
+print('Number of matches between true and predicted labels: ' + str(matches))
