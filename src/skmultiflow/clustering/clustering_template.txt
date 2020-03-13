@@ -9,11 +9,10 @@ from skmultiflow.evaluation.base_evaluator import ClassificationPerformanceEvalu
 # Setup a data stream
 #stream = RandomRBFGenerator(model_random_state=1,
 #                            sample_random_state=None,
-#                            n_classes=2,
+#                            n_classes=5,
 #                            n_features=10,
 #                            n_centroids=50)
-#stream = FileStream('~/Work/data/stream_clustering.csv')
-#stream.prepare_for_use()
+stream = FileStream('~/Work/data/stream_clusters.csv')
 
 # Setup the desired estimator
 clusterer = Clustream(random_state=1,
@@ -53,3 +52,5 @@ print('Completeness score: {}'.format(metric_score))
 print('{} samples analyzed.'.format(n_samples))
 #print('Cluster labels: {}'.format(labels))
 print('Number of matches between true and predicted labels: ' + str(matches))
+
+#print(labels_pred)
